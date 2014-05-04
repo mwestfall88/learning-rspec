@@ -14,10 +14,6 @@ class Fixnum
 		if as_array.length == 1 and as_array[0] == '0'
 			return 'zero'
 		end
-		#deletes zeros
-		until as_array[0] != '0' || as_array.length == 1
-			as_array.shift
-		end
 		#begin base cases
 		if as_array.length == 1
 			return ones[as_array[0].to_i]
@@ -33,25 +29,46 @@ class Fixnum
 		elsif as_array.length == 3
 			out = ones[as_array.shift.to_i] + " hundred "
 				if as_array[0] == '0'
-					out.chomp(" ")
-				else out << self.in_words(as_array)
+					out.chomp!(" ")
+				else 
+					new_num = 0
+					as_array.reverse!.each_with_index do |x, i| 
+						new_num += x.to_i * 10**i
+					end
+					out << new_num.in_words
 				end
 			return out
 		#split into groups of threes (i.e. thousands, millions, billions, etc...)
 		else 
-			order = as_array.length/3
+			order = (as_array.length-1)/3
 			order_mod = as_array.length % 3
+			order_mod = 3 if order_mod == 0
 			next_order = []
 			order_mod.times do 
 				next_order.push(as_array.shift)
 			end
-			out = self.in_words(next_order) + oom[order] + self.in_words(as_array)
-			return out.chomp(" ")
+			order_num =  0
+			new_num = 0
+			until as_array[0] != '0'
+				as_array.shift
+			end
+			as_array.reverse!.each_with_index do |x, i| 
+					new_num += x.to_i * 10**i
+			end
+			next_order.reverse!.each_with_index do |x, i| 
+				order_num += x.to_i * 10**i
+			end
+			out = order_num.in_words + oom[order]
+			if new_num > 0 
+				out << new_num.in_words
+			else
+				out.chomp!(" ")
+			end
+			return out
 		end
 	end
 
 end
 
 
-puts 10500070.in_words
-
+print 2100000000.in_words
